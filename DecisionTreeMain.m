@@ -22,14 +22,14 @@ for i = 6:6
         training_data = clean_x(training(C, fold), :);
         training_label = eachEmotionY(training(C, fold), :);
         training_size = size(training_data, 1);
-        emotionTree{i, fold};% = DecisionTreeLearning(training_data, 1:numCol, training_label);        
+        emotionTree{i, fold} = DecisionTreeLearning(training_data, 1:numCol, training_label);        
     end
 end
 
 emotionPredictions = zeros(101, 10);
 for fold = 1:1
     test_data = clean_x(test(C, fold), :);
-    test_label = eachEmotionY(test(C, fold), :);
+    %test_label = eachEmotionY(test(C, fold), :);
     test_size = size(test_data, 1);
     emotionPredictions(:,fold) = testTrees(emotionTree(:,fold), test_data);
 end
