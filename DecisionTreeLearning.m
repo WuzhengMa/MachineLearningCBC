@@ -1,4 +1,4 @@
-function[tree] = DecisionTreeLearning(examples, attributes, binary_targets)
+function tree = DecisionTreeLearning(examples, attributes, binary_targets)
 %The input of this function is the testing data, where "examples" stands
 %for training data, "attributes" indicates what each column of training data
 %represents and "binary_targets" specifies the label of the training data
@@ -7,7 +7,7 @@ if all_binary_targets_same(binary_targets)
     tree = create_node(examples, attributes, binary_targets);
     return;
 elseif attributes_empty
-    tree = MAJORITY_VALUE(binary_targets);
+    tree = mode(binary_targets);
     return;
 else
     best_attribute_label = CHOOSE_BEST_DECISION_ATTRIBUTE(examples, attributes, binary_targets)
@@ -47,3 +47,11 @@ function allSame = all_binary_targets_same(all_binary_targets_same)
     end
 end
 
+function res = choose_best_attribute(examples, attributes, binary_targets)
+    ig = zeros(length(attributes),1);
+    for i = 1: length(attributes)
+        ig(i) = information_gain(examples, attributes(i),binary_targets);
+    end
+    [maxV,maxId] = max(ig);
+    res = attributes(maxId);
+end
