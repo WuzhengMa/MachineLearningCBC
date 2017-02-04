@@ -1,4 +1,4 @@
-%Part I, Loading Data
+%% Part I, Loading Data
 load cleandata_students.mat;
 clean_x = x;
 clean_y = y;
@@ -12,7 +12,7 @@ for j=1:length(clean_y)
     emotionY(j,clean_y(j)) = 1;
 end
 
-%Part II Construct trees
+%% Part II Training trees
 k = 10;
 emotionTree = cell(6,10);
 C = cvpartition(zeros(1004, 1), 'KFold', k);  %perform KFold
@@ -26,6 +26,7 @@ for i = 1:6
     end
 end
 
+%% Testing trees
 emotionPredictions = zeros(101, 10);
 for fold = 1:1
     test_data = clean_x(test(C, fold), :);
@@ -48,7 +49,46 @@ function predictions = testTrees(T, x)
             [labelPred(i),levelOfDecision(i)] = testEachTree(T{i},x(eachRow,:),1);
         end
         
-        if all(labelPred == 0) == 1 %No emotion is catagorized
+        if all(labelPred == 0) == 1 
+            %When no emotion is catagorized, adjust one attribute at a time and perform the test process.
+            %Repeat for all attributes and assign the label of the adjusted data for which the 
+            %depth of the decision tree is minimal, to the test data. 
+            currentRow = x(eachRow,:);
+            adjustedDataLabels = zeros(1,size(currentRow));
+            adjustedDataLevels = zeros(1,size(currentRow));
+
+            for i = 1:size(currentRow)  %For each attributes within a test data
+                adjustedRow = currentRow;
+                adjustedRow(i) = bitxor(currentRow(i),1);   %Toggle the attribute
+                
+                %Perform test process on adjusted data
+                for j = 1:numOfTrees
+                    [labelPred(j),levelOfDecision(j)] = testTree(T{j},adjustedRow,1);
+                end
+                if all(labelPred == 0) == 1 %Continue if the adjusted Data still returns all zeros
+                    continue;
+                else
+                    for j = 1:numOfTrees
+                        if labelPred(j) == 0
+                            levelOfDecision(j) = inf;
+                        end
+                    end
+                    %Determine and store the label of each adjusted data
+                    %according to minimum length principle
+                    [minlevel,minId] = min(levelOfDecision);
+                    adjustedDataLabels(i) = minId;
+                    adjustedDataLevels(i) = minlevel;
+                end
+            end
+            
+            %Randomly assign a label for the test data if all adjusted data
+            %return all zeros
+            if all(adjustedDataLabels == 0) == 1
+                predictions(eachRow) = randi(length(labelPred));
+            else
+                %Else return the label which the layer number is minimal
+                predictions(eachRow) = adjustedDataLabels(min(adjustedDataLevels, 2));
+            end
             
         elseif MinimumLengthPrinciple == true 
             %Use minimum length principle if multiple labels has been 
@@ -58,7 +98,7 @@ function predictions = testTrees(T, x)
                     levelOfDecision(j) = inf;
                 end
             end
-            predictions(eachRow) = min(level_labels,2);
+            predictions(eachRow) = min(levelOfDecision,2);
         else
             %Or randomly assigned a label from multiple labels
             for j = 1:numOfTrees
@@ -71,8 +111,19 @@ function predictions = testTrees(T, x)
     end
 end
 
-function prediction = testEachTree(tree, row, layer)
-
+function [labelPred,levelOfDecision] = testEachTree(tree, row, layer)
+    if isnan(tree.class) == 0
+        labelPred = tree.class;
+        levelOfDecision = p_level;
+        return;
+    else
+        for i = 1:size(tree.op)
+           if row(tree.op) == tree.attributeValue{i}
+               [labelPred, levelOfDecision] = testEachTree(tree.kids{i}, row, layer+1);
+               return
+           end
+        end
+    end
 end
 
 
