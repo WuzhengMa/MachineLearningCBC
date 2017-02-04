@@ -16,7 +16,7 @@ end
 k = 10;
 emotionTree = cell(6,10);
 C = cvpartition(zeros(1004, 1), 'KFold', k);  %perform KFold
-for i = 6:6
+for i = 1:6
     eachEmotionY = emotionY(:,i);
     for fold = 1:1  
         training_data = clean_x(training(C, fold), :);
@@ -34,9 +34,45 @@ for fold = 1:1
     emotionPredictions(:,fold) = testTrees(emotionTree(:,fold), test_data);
 end
 
-
+MinimumLengthPrinciple = true;
 function predictions = testTrees(T, x)
+    rows = size(x,1);
+    numOfTrees = size(T,1);
+    predictions = zeros(rows, 1);
+    labelPred = zeros(1, numOfTrees);
+    levelOfDecision = zeros(1, numOfTrees);
     
+    for eachRow = 1:rows
+        for i = 1:numOfTrees
+            %Test each row with each emotion tree
+            [labelPred(i),levelOfDecision(i)] = testEachTree(T{i},x(eachRow,:),1);
+        end
+        
+        if all(labelPred == 0) == 1 %No emotion is catagorized
+            
+        elseif MinimumLengthPrinciple == true 
+            %Use minimum length principle if multiple labels has been 
+            %catagorized from different trees
+            for j = 1:numOfTrees
+                if labelPred(j) == 0
+                    levelOfDecision(j) = inf;
+                end
+            end
+            predictions(eachRow) = min(level_labels,2);
+        else
+            %Or randomly assigned a label from multiple labels
+            for j = 1:numOfTrees
+                if labelPred(j) == 0
+                    labelPred(comLabels) = [];
+                end
+            end
+            predictions(eachRow) = randi(length(labelPred));
+        end
+    end
+end
+
+function prediction = testEachTree(tree, row, layer)
+
 end
 
 
