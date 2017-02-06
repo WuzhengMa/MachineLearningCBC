@@ -1,9 +1,11 @@
-function output = evaluate(predictionsList, actualList)
+function output = evaluation(predictionsList, actualList)
     %predictionLength = length(predictionsList)/10;
     %plot total confusionmatrix
-    x = reshape(predictionList, 1,[]);
+    
+    x = reshape(predictionsList, 1,[]);
     y = reshape(actualList, 1, []);
-    [C, ~] = confusionmat(aList, pList);
+    [C, ~] = confusionmat(y, x);
+    C = C ./ 10;
     %now calculate PR, recall, class, f1 and confusionmatrix
     precision = calPR(C);
     recall = calRecall(C);
@@ -11,7 +13,7 @@ function output = evaluate(predictionsList, actualList)
     output.precision = precision;
     output.recall = recall;
     output.f1 = calf1(precision, recall);
-    output.classrate = calclassficationrate(x,y);
+    output.classrate = calclassficationrate(C);
 end
 
 
