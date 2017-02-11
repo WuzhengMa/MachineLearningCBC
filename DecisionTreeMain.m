@@ -1,11 +1,10 @@
 %% Part I, Loading Data
 load cleandata_students.mat;
+%load noisydata_students.mat;
 %Only 1000 data was used because 1004 is non-divisible by 10 in cross-validation
 clean_x = x(1:1000,:);  
 clean_y = y(1:1000,:);
-load noisydata_students.mat;
-noisy_x = x;
-noisy_y = y;
+
 
 [numRow, numCol] = size(clean_x);
 emotionY = zeros(numRow,6);
@@ -34,7 +33,7 @@ emotionLabel = zeros(100, 10);  %Actual label
 for fold = 1:k
     test_data = clean_x(test(C, fold), :);
     test_size = size(test_data, 1);
-    emotionPredictions(:,fold) = testTrees(emotionTree(:,fold), test_data, false);   %Apply test data to the trees for each fold
+    emotionPredictions(:,fold) = testTrees(emotionTree(:,fold), test_data, true);   %Apply test data to the trees for each fold
 end
 
 

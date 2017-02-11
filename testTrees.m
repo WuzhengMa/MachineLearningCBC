@@ -16,45 +16,46 @@ function predictions = testTrees(T, x, MinimumLengthPrinciple)
             %This is based on Nearest Neiborgh Concept
             %Repeat for all attributes and assign the label of the adjusted data for which the 
             %depth of the decision tree is minimal, to the test data. 
-            currentRow = x(eachRow,:);
-            
-            adjustedDataLabels = [];
-            adjustedDataLevels = [];
-
-            for i = 1:size(currentRow, 2)  %For each attributes within a test data
-                adjustedRow = currentRow;
-                adjustedRow(i) = bitxor(currentRow(i),1);   %Toggle the attribute
-                
-                %Perform test process on adjusted data
-                for j = 1:numOfTrees
-                    [labelPred(j),levelOfDecision(j)] = testEachTree(T{j},adjustedRow,1);
-                end
-                if all(labelPred == 0) == 1 %Continue if the adjusted Data still returns all zeros
-                    continue;
-                else
-                    for j = 1:numOfTrees
-                        if labelPred(j) == 0
-                            levelOfDecision(j) = inf;
-                        end
-                    end
-                    %Determine and store the label of each adjusted data
-                    %according to minimum length principle (choose the label for which the depth of the tree is the smallest)
-                    [minlevel,minId] = min(levelOfDecision);
-                    adjustedDataLabels(end+1) = minId;
-                    adjustedDataLevels(end+1) = minlevel;
-                end
-            end
-            
-            %Randomly assign a label for the test data if all adjusted data
-            %still return all zeros
-            if isempty(adjustedDataLabels)
-                predictions(eachRow) = randi(length(labelPred));
-            else
-                %Else return the label which the depth of the tree is the
-                %minimum
-                [minlevel,minId] = min(adjustedDataLevels);
-                predictions(eachRow) = adjustedDataLabels(minId);
-            end
+            predictions(eachRow) = randi(length(labelPred));
+%             currentRow = x(eachRow,:);
+%             
+%             adjustedDataLabels = [];
+%             adjustedDataLevels = [];
+% 
+%             for i = 1:size(currentRow, 2)  %For each attributes within a test data
+%                 adjustedRow = currentRow;
+%                 adjustedRow(i) = bitxor(currentRow(i),1);   %Toggle the attribute
+%                 
+%                 %Perform test process on adjusted data
+%                 for j = 1:numOfTrees
+%                     [labelPred(j),levelOfDecision(j)] = testEachTree(T{j},adjustedRow,1);
+%                 end
+%                 if all(labelPred == 0) == 1 %Continue if the adjusted Data still returns all zeros
+%                     continue;
+%                 else
+%                     for j = 1:numOfTrees
+%                         if labelPred(j) == 0
+%                             levelOfDecision(j) = inf;
+%                         end
+%                     end
+%                     %Determine and store the label of each adjusted data
+%                     %according to minimum length principle (choose the label for which the depth of the tree is the smallest)
+%                     [minlevel,minId] = min(levelOfDecision);
+%                     adjustedDataLabels(end+1) = minId;
+%                     adjustedDataLevels(end+1) = minlevel;
+%                 end
+%             end
+%             
+%             %Randomly assign a label for the test data if all adjusted data
+%             %still return all zeros
+%             if isempty(adjustedDataLabels)
+%                 predictions(eachRow) = randi(length(labelPred));
+%             else
+%                 %Else return the label which the depth of the tree is the
+%                 %minimum
+%                 [minlevel,minId] = min(adjustedDataLevels);
+%                 predictions(eachRow) = adjustedDataLabels(minId);
+%             end
             
         elseif MinimumLengthPrinciple == true 
             %Use minimum length principle (choose the label for which the depth of the tree is the smallest)
